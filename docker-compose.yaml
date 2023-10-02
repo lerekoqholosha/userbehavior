@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  user-behavior:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:5001"
+    volumes:
+      - ./data:/app/data  # Adjust the paths as necessary
+    networks:
+      - stackcards
+
+networks:
+  stackcards:
+    driver: bridge

@@ -1,0 +1,25 @@
+fastapi
+uvicorn
+gunicorn
+pydantic-settings
+pydantic
+python-multipart
+
+# formatting
+colorama
+
+# machine learning
+numpy
+pandas
+scikit-learn
+joblib
+
+# data analysis
+sqlalchemy
+
+# data visualisation
+streamlit
+plotly-express
+
+# unittesting
+pytest
