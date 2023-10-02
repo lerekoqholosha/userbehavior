@@ -392,3 +392,9 @@ app/routers/analytics.py::test_transform_date[20230520-2023/05/20] PASSED       
 [3] https://pytorch.org/
 [4] https://vaex.io/docs/index.html
 
+
+# How to submit your code
+
+[1] Clone the project
+[2] submit a zip file
+
