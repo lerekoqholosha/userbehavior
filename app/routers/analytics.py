@@ -4,6 +4,9 @@ import json
 import numpy as np
 from datetime import datetime
 from fastapi import APIRouter, Path, Query, HTTPException
+import pandas as pd
+from collections import defaultdict
+from datetime import datetime
 from typing import Optional
 
 # data analytics
@@ -75,6 +78,51 @@ def total_daily_expenses(bank_statement: list) -> pd.DataFrame:
         return expenses
 
     return _sum(data=daily_expenses)
+    
+def total_weekly_expenses(bank_statement: list) -> pd.DataFrame:
+    """Calculate and return summed weekly expenses"""
+    weekly_expenses = defaultdict(list)
+
+    for item in bank_statement:
+        if item['STATUS'] == 'OPEN' or item['STATUS'] == 'CLOSE':
+            pass
+        else:
+            if item['AMOUNT'] < 0:  # Negative cash flow (expenses)
+                # Extract the date and calculate the start of the week (Sunday)
+                date_obj = datetime.strptime(item['DATE (YYYY/MM/DD)'], '%Y/%m/%d')
+                week_start = date_obj - timedelta(days=date_obj.weekday())
+                week_start_str = week_start.strftime('%Y-%m-%d')  # Format: YYYY-MM-DD
+                weekly_expenses[week_start_str].append(item['AMOUNT'])
+    
+    def _sum(data: dict) -> pd.DataFrame:
+        expenses = {}
+        for period, amounts in data.items():
+            expenses[period] = round(abs(sum(amounts)), 3)
+        return pd.DataFrame({'Week Start': list(expenses.keys()), 'Total Expenses': list(expenses.values())})
+
+    return _sum(data=weekly_expenses)
+    
+def total_monthly_expenses(bank_statement: list) -> pd.DataFrame:
+    """Calculate and return summed monthly expenses"""
+    monthly_expenses = defaultdict(list)
+
+    for item in bank_statement:
+        if item['STATUS'] == 'OPEN' or item['STATUS'] == 'CLOSE':
+            pass
+        else:
+            if item['AMOUNT'] < 0:  # Negative cash flow (expenses)
+                # Extract the year and month from the date
+                date_obj = datetime.strptime(item['DATE (YYYY/MM/DD)'], '%Y/%m/%d')
+                year_month = date_obj.strftime('%Y-%m')  # Format: YYYY-MM
+                monthly_expenses[year_month].append(item['AMOUNT'])
+   
+    def _sum(data: dict) -> pd.DataFrame:
+        expenses = {}
+        for period, amounts in data.items():
+            expenses[period] = round(abs(sum(amounts)), 3)
+        return pd.DataFrame({'Month': list(expenses.keys()), 'Total Expenses': list(expenses.values())})
+
+    return _sum(data=monthly_expenses)
 
 
 @analytics_router.get('/data')
@@ -105,13 +153,18 @@ async def weekly_expenses():
 @analytics_router.get('/monthly_expenses')
 async def monthly_expenses():
     """Return monthly expenses tabulated data"""
-    pass
+     res = await read_statement()
+     total_expenses = total_daily_expenses(res)
+     return total_expenses
 
 
 @analytics_router.get('/category_expenses')
 async def expenses_per_category():
     """Return expenses per category, monthly"""
-    pass
+    res = await read_statement()
+    total_expenses = total_daily_expenses(res)
+    return total_expenses
+
 
 
 # machine learning model - optional
